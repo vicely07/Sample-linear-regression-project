@@ -1,0 +1,225 @@
+---
+title: "Applied-1-prelim-2021"
+author: "Vi Ly"
+date: "8/17/2021"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Source: https://rpubs.com/Abhilash333/396604
+## Applied regression Framework:
+# 1. Loading data:
+```{r}
+setwd("C:/Users/lykha/OneDrive/Documents/1_Qualify-exam-review/5_Applied-regression (Applied)/Prelim-2021-submission")
+data <- read.csv("PH1821_data.csv")
+data
+```
+```{r}
+# Not including the ID column
+data <- data[0:nrow(data), 2:ncol(data)]
+```
+
+## 2. Summary stats:
+```{r}
+## 5 number summary stats:
+summary(data)
+```
+## NA omit to drop the row with missing data:
+```{r}
+data <- na.omit(data)
+nrow(data)
+```
+
+
+## 3.1 Normalily checking for continous covariates:
+```{r}
+s <- data[, c("AGE", "Cholesterol", "Biomarker")]
+colnames(s)
+
+
+for (i in colnames(s)){
+  qqnorm(s[,i], main = paste("QQplot of", i), xlab=i)
+  qqline(s[,i])
+  hist(s[, i], main=paste("Histogram of", i), xlab=i)
+  print(paste("Shapiro test for", i))
+  print(shapiro.test(s[,i]))
+}
+```
+
+
+## 3.2 Frequency table of categorical variables:
+```{r}
+table_x <- table(data$GENDER)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c("Male", "Female")
+data_freq
+```
+
+
+```{r}
+table_x <- table(data$EDU)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c(1, 2, 3, 4)
+data_freq
+```
+```{r}
+table_x <- table(data$Hypertension)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c("No", "Yes")
+data_freq
+```
+
+
+```{r}
+table_x <- table(data$Diabetes)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c("No", "Yes")
+data_freq
+```
+
+```{r}
+table_x <- table(data$HeartAttack)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c("No", "Yes")
+data_freq
+```
+
+```{r}
+table_x <- table(data$Stroke)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c("No", "Yes")
+data_freq
+```
+
+```{r}
+table_x <- table(data$Cardiovascular)
+cumsum_table_x <- cumsum(table_x) 
+n <- nrow(data)
+data_freq <- data.frame(Freq = as.numeric(table_x),  # Create data frame with relevant values
+                        Percent = round(as.numeric(table_x / n)*100, 2),
+                        Culmulative_freq = as.numeric(cumsum_table_x),
+                        Culmulative_percent = round(as.numeric(cumsum_table_x / n)*100, 2))
+rownames(data_freq) <- c("No", "Yes")
+data_freq
+```
+
+
+Row names are always 0 then 1 #find correct matched categories using the given description
+
+## 3.3 Scatter plot of the continous data:
+```{r}
+pairs(s)
+```
+Spearman Correlation Coefficients:
+```{r}
+for (i in colnames(s)){
+  print(paste("Correlation test for:", i))
+  print(cor.test(data$Cholesterol, s[, i]))
+}
+```
+
+## 4. Regression model:
+```{r}
+attach(data)
+mod <- lm(Cholesterol ~ ., data = data)
+summary(mod)
+```
+
+
+## 5. Checking the regression model assumptions on residuals:
+1.linearity
+2.normality
+3.homoscadescity
+4.independency
+```{r}
+plot(mod)
+```
+Here in residuals vs fitted plot the red line is almost lying near to zero residual value and is almost horizontal and all the fitted values are scattered around it without any systematic relationship. Therefore , LINEARITY is met on residuals
+
+In normal q-q plot drawn, the residuals are almost linearly distributed.(but lets check normaly futher using other tests)
+
+In scale-location plot,all the residuals are scattered(i.e none of the points are clustered at one spot). Therefore, HOMOSCADESCITY IS MET on residuals.
+
+## Checking for normality on residuals:
+```{r}
+shapiro.test(mod$residuals)
+```
+Here the probability value of both Shapiro Wilk is more than 0.05 hence, we accept null hypothesis saying that the residual data is normally distributed. 
+And we also have skewness nearly equal to zero and kurtosis nearly equal to 3 where we can say that residual data is normally distributed. Therefore, NORMALITY IS MET on residuals
+
+
+No violation so no need for Box-cox transforamtion.
+# Box-cox transformation (if necessary):
+#find optimal lambda for Box-Cox transformation 
+
+```{r}
+library(MASS)
+bc <- boxcox(Cholesterol ~., data = data)
+(lambda <- bc$x[which.max(bc$y)])
+#fit new linear regression model using the Box-Cox transformation
+new_model <- lm(((Cholesterol^lambda-1)/lambda) ~ ., data=data)
+```
+
+## For convinient, the log transformation is performed to save time:
+```{r}
+trans.mod <- lm(log(Cholesterol) ~., data = data)
+summary(trans.mod)
+```
+```{r}
+plot(trans.mod)
+```
+```{r}
+shapiro.test(mod$residuals)
+```
+# 6. Stepwise selection for multiple covariates:
+```{r}
+library(MASS)
+# Fit the full model 
+full.model <- lm(log(Cholesterol) ~., data = data)
+# Stepwise regression model
+step.model <- stepAIC(full.model, direction = "both", scope = list(lower = ~ Biomarker),
+                      trace = FALSE)
+summary(step.model)
+```
+Final model
+```{r}
+exp(0.0001346)
+```
+
+
+
